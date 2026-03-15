@@ -26,6 +26,7 @@ const fetchOrders = async () => {
   try {
     loading.value = true;
     orders.value = [];
+    error.value = '';
     const response = await tiendaNubeAPI.getOrders(props.contactId);
     orders.value = response.data.orders;
   } catch (e) {
