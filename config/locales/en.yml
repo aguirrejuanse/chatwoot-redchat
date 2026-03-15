@@ -342,6 +342,10 @@ en:
       name: 'Notion'
       short_description: 'Integrate databases, documents and pages directly with Captain.'
       description: 'Connect your Notion workspace to enable Captain to access and generate intelligent responses using content from your databases, documents, and pages to provide more contextual customer support.'
+    tienda_nube:
+      name: 'Tienda Nube'
+      short_description: 'Access order details and customer data from your Tienda Nube store.'
+      description: 'Connect your Tienda Nube store to access order details and customer information directly within your conversations.'
     shopify:
       name: 'Shopify'
       short_description: 'Access order details and customer data from your Shopify store.'
