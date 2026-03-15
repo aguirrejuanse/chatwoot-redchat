@@ -13,7 +13,9 @@ const props = defineProps({
 const { t, locale } = useI18n();
 
 const formatDate = dateString => {
-  return format(new Date(dateString), 'MMM d, yyyy');
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return '';
+  return format(date, 'MMM d, yyyy');
 };
 
 const formatCurrency = (amount, currency) => {
