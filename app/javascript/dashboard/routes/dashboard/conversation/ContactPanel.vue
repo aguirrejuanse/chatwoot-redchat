@@ -20,6 +20,7 @@ import CustomAttributes from './customAttributes/CustomAttributes.vue';
 import Draggable from 'vuedraggable';
 import MacrosList from './Macros/List.vue';
 import ShopifyOrdersList from 'dashboard/components/widgets/conversation/ShopifyOrdersList.vue';
+import TiendaNubeOrdersList from 'dashboard/components/widgets/conversation/TiendaNubeOrdersList.vue';
 import SidebarActionsHeader from 'dashboard/components-next/SidebarActionsHeader.vue';
 import LinearIssuesList from 'dashboard/components/widgets/conversation/linear/IssuesList.vue';
 import LinearSetupCTA from 'dashboard/components/widgets/conversation/linear/LinearSetupCTA.vue';
@@ -52,6 +53,15 @@ const shopifyIntegration = useFunctionGetter(
 
 const isShopifyFeatureEnabled = computed(
   () => shopifyIntegration.value.enabled
+);
+
+const tiendaNubeIntegration = useFunctionGetter(
+  'integrations/getIntegration',
+  'tienda_nube'
+);
+
+const isTiendaNubeFeatureEnabled = computed(
+  () => tiendaNubeIntegration.value.enabled
 );
 
 const { isCloudFeatureEnabled } = useAccount();
@@ -125,8 +135,9 @@ onMounted(() => {
   conversationSidebarItems.value = conversationSidebarItemsOrder.value;
   getContactDetails();
   store.dispatch('attributes/get', 0);
-  // Load integrations to ensure linear integration state is available
+  // Load integrations to ensure integration state is available
   store.dispatch('integrations/get', 'linear');
+  store.dispatch('integrations/get', 'tienda_nube');
 });
 </script>
 
@@ -283,6 +294,24 @@ onMounted(() => {
               "
             >
               <ShopifyOrdersList :contact-id="contactId" />
+            </AccordionItem>
+          </div>
+          <div
+            v-else-if="
+              element.name === 'tienda_nube_orders' &&
+              isTiendaNubeFeatureEnabled
+            "
+          >
+            <AccordionItem
+              :title="$t('CONVERSATION_SIDEBAR.ACCORDION.TIENDA_NUBE_ORDERS')"
+              :is-open="isContactSidebarItemOpen('is_tienda_nube_orders_open')"
+              compact
+              @toggle="
+                value =>
+                  toggleSidebarUIState('is_tienda_nube_orders_open', value)
+              "
+            >
+              <TiendaNubeOrdersList :contact-id="contactId" />
             </AccordionItem>
           </div>
           <div v-else-if="element.name === 'contact_notes'">
