@@ -61,7 +61,7 @@ class Api::V1::Accounts::Integrations::TiendaNubeController < Api::V1::Accounts:
 
   def api_headers
     {
-      'Authorization' => "bearer #{@hook.access_token}",
+      'Authentication' => "bearer #{@hook.access_token}",
       'Content-Type' => 'application/json',
       'User-Agent' => 'Chatwoot (support@chatwoot.com)'
     }
@@ -93,17 +93,31 @@ class Api::V1::Accounts::Integrations::TiendaNubeController < Api::V1::Accounts:
       }
     )
 
+    store_domain = @hook.settings['store_domain']
     orders.map do |order|
       order.merge(
-        'admin_url' => "https://www.tiendanube.com/admin/#{@hook.reference_id}/orders/#{order['id']}"
+        'admin_url' => store_domain ? "https://#{store_domain}/admin/orders/#{order['id']}" : nil
       )
     end
   end
 
-  def tienda_nube_get(path, params = {})
+  def tienda_nube_get(path, params)
     uri = URI("#{api_base_url}#{path}")
     uri.query = URI.encode_www_form(params) if params.any?
 
+    response = execute_get(uri)
+    unless response.is_a?(Net::HTTPSuccess)
+      Rails.logger.error("Tienda Nube API error (#{path}): HTTP #{response.code} #{response.body}")
+      return []
+    end
+
+    JSON.parse(response.body)
+  rescue StandardError => e
+    Rails.logger.error("Tienda Nube API error (#{path}): #{e.message}")
+    []
+  end
+
+  def execute_get(uri)
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.open_timeout = 5
@@ -111,13 +125,6 @@ class Api::V1::Accounts::Integrations::TiendaNubeController < Api::V1::Accounts:
 
     request = Net::HTTP::Get.new(uri)
     api_headers.each { |k, v| request[k] = v }
-
-    response = http.request(request)
-    return [] unless response.is_a?(Net::HTTPSuccess)
-
-    JSON.parse(response.body)
-  rescue StandardError => e
-    Rails.logger.error("Tienda Nube API error (#{path}): #{e.message}")
-    []
+    http.request(request)
   end
 end

@@ -42,15 +42,41 @@ class TiendaNube::CallbacksController < ApplicationController
   end
 
   def handle_response(parsed_body)
+    access_token = parsed_body['access_token']
+    store_id = parsed_body['user_id'].to_s
+    store_domain = fetch_store_domain(store_id, access_token)
+
     account.hooks.create!(
       app_id: 'tienda_nube',
-      access_token: parsed_body['access_token'],
+      access_token: access_token,
       status: 'enabled',
       # store_id (user_id) is required for all Tienda Nube API calls
-      reference_id: parsed_body['user_id'].to_s
+      reference_id: store_id,
+      settings: { store_domain: store_domain }
     )
 
     redirect_to tienda_nube_integration_url(account), allow_other_host: true
+  end
+
+  def fetch_store_domain(store_id, access_token)
+    uri = URI("https://api.tiendanube.com/v1/#{store_id}/store")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.open_timeout = 5
+    http.read_timeout = 10
+
+    request = Net::HTTP::Get.new(uri)
+    request['Authentication'] = "bearer #{access_token}"
+    request['Content-Type'] = 'application/json'
+    request['User-Agent'] = 'Chatwoot (support@chatwoot.com)'
+
+    response = http.request(request)
+    return nil unless response.is_a?(Net::HTTPSuccess)
+
+    JSON.parse(response.body)['original_domain']
+  rescue StandardError => e
+    Rails.logger.error("Tienda Nube fetch store domain error: #{e.message}")
+    nil
   end
 
   def account
