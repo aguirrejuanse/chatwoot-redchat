@@ -55,7 +55,6 @@ class Api::V1::Accounts::Integrations::TiendaNubeController < Api::V1::Accounts:
     render json: { error: 'Contact information missing' }, status: :unprocessable_entity
   end
 
-  # Tienda Nube API base URL uses the store_id (stored as reference_id)
   def api_base_url
     "https://api.tiendanube.com/v1/#{@hook.reference_id}"
   end
