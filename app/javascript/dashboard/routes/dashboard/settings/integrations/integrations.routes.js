@@ -9,6 +9,7 @@ import Slack from './Slack.vue';
 import Linear from './Linear.vue';
 import Notion from './Notion.vue';
 import Shopify from './Shopify.vue';
+import TiendaNube from './TiendaNube.vue';
 
 export default {
   routes: [
@@ -82,6 +83,16 @@ export default {
           path: 'shopify',
           name: 'settings_integrations_shopify',
           component: Shopify,
+          meta: {
+            featureFlag: FEATURE_FLAGS.INTEGRATIONS,
+            permissions: ['administrator'],
+          },
+          props: route => ({ error: route.query.error }),
+        },
+        {
+          path: 'tienda_nube',
+          name: 'settings_integrations_tienda_nube',
+          component: TiendaNube,
           meta: {
             featureFlag: FEATURE_FLAGS.INTEGRATIONS,
             permissions: ['administrator'],

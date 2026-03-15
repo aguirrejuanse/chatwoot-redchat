@@ -321,6 +321,12 @@ Rails.application.routes.draw do
                 get :orders
               end
             end
+            resource :tienda_nube, controller: 'tienda_nube', only: [:destroy] do
+              collection do
+                post :auth
+                get :orders
+              end
+            end
             resource :linear, controller: 'linear', only: [] do
               collection do
                 delete :destroy
@@ -579,6 +585,10 @@ Rails.application.routes.draw do
   end
 
   namespace :shopify do
+    resource :callback, only: [:show]
+  end
+
+  namespace :tienda_nube do
     resource :callback, only: [:show]
   end
 
