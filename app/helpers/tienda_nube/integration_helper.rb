@@ -1,10 +1,6 @@
 module TiendaNube::IntegrationHelper
   REQUIRED_SCOPES = %w[read_orders read_customers].freeze
 
-  # Generates a signed JWT token for Tienda Nube integration
-  #
-  # @param account_id [Integer] The account ID to encode in the token
-  # @return [String, nil] The encoded JWT token or nil if client secret is missing
   def generate_tienda_nube_token(account_id)
     return if client_secret.blank?
 
@@ -14,17 +10,6 @@ module TiendaNube::IntegrationHelper
     nil
   end
 
-  def token_payload(account_id)
-    {
-      sub: account_id,
-      iat: Time.current.to_i
-    }
-  end
-
-  # Verifies and decodes a Tienda Nube JWT token
-  #
-  # @param token [String] The JWT token to verify
-  # @return [Integer, nil] The account ID from the token or nil if invalid
   def verify_tienda_nube_token(token)
     return if token.blank? || client_secret.blank?
 
@@ -32,6 +17,13 @@ module TiendaNube::IntegrationHelper
   end
 
   private
+
+  def token_payload(account_id)
+    {
+      sub: account_id,
+      iat: Time.current.to_i
+    }
+  end
 
   def client_id
     @client_id ||= GlobalConfigService.load('TIENDA_NUBE_CLIENT_ID', nil)
@@ -42,15 +34,7 @@ module TiendaNube::IntegrationHelper
   end
 
   def decode_token(token, secret)
-    JWT.decode(
-      token,
-      secret,
-      true,
-      {
-        algorithm: 'HS256',
-        verify_expiration: true
-      }
-    ).first['sub']
+    JWT.decode(token, secret, true, algorithm: 'HS256').first['sub']
   rescue JWT::DecodeError => e
     Rails.logger.error("Unexpected error verifying Tienda Nube token: #{e.message}")
     nil
