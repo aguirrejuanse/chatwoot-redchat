@@ -1,10 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import {
-  useFunctionGetter,
-  useMapGetter,
-  useStore,
-} from 'dashboard/composables/store';
+import { useFunctionGetter, useStore } from 'dashboard/composables/store';
 import { useI18n } from 'vue-i18n';
 import Integration from './Integration.vue';
 import integrationAPI from 'dashboard/api/integrations';
@@ -28,7 +24,6 @@ const integration = useFunctionGetter(
   'integrations/getIntegration',
   'tienda_nube'
 );
-const uiFlags = useMapGetter('integrations/getUIFlags');
 
 const integrationAction = computed(() => {
   if (integration.value.enabled) {
@@ -45,8 +40,8 @@ const handleConnect = async () => {
     if (data.redirect_url) {
       window.location.href = data.redirect_url;
     }
-  } catch (error) {
-    // error handled by Integration component
+  } catch {
+    // swallow — redirect on success, nothing to show on failure
   } finally {
     isSubmitting.value = false;
   }
@@ -63,9 +58,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <SettingsLayout
-    :is-loading="!integrationLoaded || uiFlags.isCreatingTiendaNube"
-  >
+  <SettingsLayout :is-loading="!integrationLoaded">
     <template #header>
       <BaseSettingsHeader
         :title="$t('INTEGRATION_SETTINGS.TIENDA_NUBE.HEADER')"
